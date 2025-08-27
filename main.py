@@ -1,6 +1,11 @@
-def main():
-    print("Hello from sds-chatbot!")
+from fastapi import FastAPI
+from app.api.chat_router import router
+import uvicorn
+
+app = FastAPI()
+
+app.include_router(router)
 
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(app, host="0.0.0.0", port=3000)

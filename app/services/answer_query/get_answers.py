@@ -1,5 +1,5 @@
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from app.services.vectorstore import answer_query_from_existing_collection
+from app.services.vectorstore.upload_document import answer_query_from_existing_collection
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 from pydantic import BaseModel, Field
@@ -34,6 +34,7 @@ class AnswerQuery:
         )
         self.model = ChatGroq(
             model="llama-3.1-8b-instant",
+            api_key=GROQ_API_KEY,
             temperature=0.7,
             max_tokens=100,
             streaming=True,

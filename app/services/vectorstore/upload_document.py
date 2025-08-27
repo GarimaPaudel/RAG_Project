@@ -25,6 +25,7 @@ async def upload_document_existing_collection(
         prefer_grpc=True,
         collection_name=collection_name_,
         retrieval_mode=RetrievalMode.DENSE,
+        force_recreate = True,
         timeout=30000,
     )
 

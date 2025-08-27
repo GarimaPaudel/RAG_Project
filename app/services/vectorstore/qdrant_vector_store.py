@@ -43,7 +43,7 @@ class QdrantVectorStoreDB:
         """Upload Documents to qdrant vectorstore"""
         try:
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=1500, chunk_overlap=150, add_start_index=True
+                chunk_size=1000, chunk_overlap=100, add_start_index=True
             )
             final_t = []
             for doc in documents:
