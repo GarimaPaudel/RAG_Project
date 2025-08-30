@@ -1,4 +1,4 @@
-# SDS Chatbot
+# RAG Chatbot
 
 ## Overview
 
