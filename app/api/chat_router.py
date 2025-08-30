@@ -1,17 +1,20 @@
+import uuid
+import os 
+import tempfile
 from fastapi import APIRouter, status, HTTPException, UploadFile, File
-from pydantic import BaseModel
 from app.services.answer_query.get_answers import AnswerQuery
 from app.services.vectorstore import QdrantVectorStoreDB
 from qdrant_client import QdrantClient
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from app.utils import settings
 from app.services.documents.load_document import DocumentTextExtractor
-import uuid
-import os 
-import tempfile
-
+from app.schemas import (
+    ChatRequest, 
+    VectorStoreSchema, 
+    DocumentResponseSchema,
+    UploadDocumentSchema,
+)
 router = APIRouter()
-
 extractor = DocumentTextExtractor()
 answer_query_service = AnswerQuery()
 vector_embeddings = GoogleGenerativeAIEmbeddings(
@@ -23,42 +26,6 @@ qdrant_client = QdrantClient(
 vectorstore = QdrantVectorStoreDB(
     qdrant_client=qdrant_client, vector_embedding=vector_embeddings
 )
-
-
-class ChatRequest(BaseModel):
-    query: str
-    session_id: str
-    collection_name: str
-
-class VectorStoreSchema(BaseModel):
-    collection_name: str
-
-class Message(BaseModel):
-    detail: str
-
-class TableSchema(BaseModel):
-    json: str | None = None
-    csv: str | None = None
-    markdown: str | None = None
-
-class DRS(BaseModel):
-    file_name: str
-    text: str | None = None
-    tables: list | TableSchema = None
-
-class DocumentResponseSchema(BaseModel):
-    results: list[DRS]
-
-
-class UploadDocumentSchema(DocumentResponseSchema):
-    pass
-
-
-class UploadDocumentsResponse(BaseModel):
-    detail: str
-
-
-
 
 @router.post("/create_collection", status_code=status.HTTP_201_CREATED)
 async def create_collection(request: VectorStoreSchema):
