@@ -7,7 +7,7 @@ services:
     env_file: .env
     restart: always
     ports:
-      - "7000:7000"
+      - "3000:3000"
     depends_on:
       - qdrant  
     volumes:
