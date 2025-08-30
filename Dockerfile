@@ -26,6 +26,7 @@ ENV PYTHONPATH=/app
 # Copy project files
 COPY ./main.py /app/main.py
 COPY ./app /app/app
+COPY tests/ tests/
 
 # Final sync (optional, but safe)
 RUN --mount=type=cache,target=/root/.cache/uv \

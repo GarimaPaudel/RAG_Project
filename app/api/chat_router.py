@@ -27,6 +27,13 @@ vectorstore = QdrantVectorStoreDB(
     qdrant_client=qdrant_client, vector_embedding=vector_embeddings
 )
 
+@router.get("/", status_code=status.HTTP_200_OK)
+async def check_health():
+    return {
+        "message": "Chatbot API is running"
+    }
+
+
 @router.post("/create_collection", status_code=status.HTTP_201_CREATED)
 async def create_collection(request: VectorStoreSchema):
     """
