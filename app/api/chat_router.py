@@ -36,11 +36,15 @@ class VectorStoreSchema(BaseModel):
 class Message(BaseModel):
     detail: str
 
+class TableSchema(BaseModel):
+    json: str | None = None
+    csv: str | None = None
+    markdown: str | None = None
 
-
-class DRS(BaseModel):  
+class DRS(BaseModel):
     file_name: str
-    text: str
+    text: str | None = None
+    tables: list | TableSchema = None
 
 class DocumentResponseSchema(BaseModel):
     results: list[DRS]
@@ -98,11 +102,12 @@ async def extract_text(files: list[UploadFile] = File(...)) -> DocumentResponseS
                 with open(temp_filename, "wb") as f:
                     f.write(file_content)
                 # Extract text
-                text = extractor.extract_text(temp_filename)
+                text_result = extractor.extract_text(temp_filename)
                 results.append(
                     {
                         "file_name": file.filename,
-                        "text": text,
+                        "text": text_result.get("text"),
+                        "tables": text_result.get("tables")
                     }
                 )
         return DocumentResponseSchema(source_type="document", results=results)
@@ -115,24 +120,39 @@ async def extract_text(files: list[UploadFile] = File(...)) -> DocumentResponseS
 async def upload_documents(
     collection_name: str,
     request: UploadDocumentSchema
-    ) :
+):
     """
     Upload documents to the collection of chatbot in Qdrant vectorstore.
     """
     try:
-        # Convert DRS objects to dicts
-        documents = [drs.model_dump() for drs in request.results]
+        documents = []
+        for drs in request.results:
+            base_doc = {
+                "file_name": drs.file_name,
+                "text": drs.text or ""
+            }
+            documents.append(base_doc)
+
+            # Add each table as a separate "document"
+            if drs.tables:
+                for idx, table in enumerate(drs.tables):
+                    documents.append({
+                        "file_name": f"{drs.file_name}_table_{idx+1}",
+                        "text": table.get("markdown") or table.get("csv") or table.get("json") or ""
+                    })
+
         response = await vectorstore.upload_documents(
             documents=documents,
-            collection_name=collection_name)
-        
+            collection_name=collection_name
+        )
+
         if response:
-            return {
-                "detail":"Documents Uploaded Successfully"
-            }
-        # raise HTTPException(status_code=500, detail="Failed to upload documents")
+            return {"detail": "Documents Uploaded Successfully"}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 
 @router.post("/chat")
